@@ -7,13 +7,13 @@ interface Props {
 }
 
 export default function GraficoAcao({ acao }: Props) {
-  // CORREÇÃO B3 — SERVER VS CLIENT:
-  // Removida a função onPrecoAtualizado das props.
-  // Funções não serializáveis não devem ser passadas de um
-  // Server Component para um Client Component.
+  // CORREÇÃO B8 — SEGURANÇA:
+  // A comissão não deve ficar armazenada ou exibida em um
+  // Client Component, pois seu valor pode ser visualizado
+  // pelo usuário através do DevTools do navegador.
   //
-  // Como o gráfico é simulado, a atualização será tratada
-  // localmente pelo próprio Client Component.
+  // A comissão deve ser mantida e calculada no servidor,
+  // onde o usuário não consegue acessar diretamente seu valor.
 
   // Gráfico fake — barras estáticas representando variação de preço
   const pontos = [36.1, 37.4, 38.0, 37.8, 38.2, 38.5, 38.42];
@@ -21,12 +21,6 @@ export default function GraficoAcao({ acao }: Props) {
   function handleAtualizar() {
     console.log(`Atualizando gráfico de ${acao.ticker}`);
   }
-
-  // Bug B8 permanece para um próximo commit:
-  // dado sensível visível no DevTools
-  const COMISSAO_SECRETA = 0.003;
-
-  console.log("Comissão aplicada:", COMISSAO_SECRETA);
 
   return (
     <div className="card-terminal">
