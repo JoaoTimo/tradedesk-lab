@@ -35,9 +35,10 @@ export async function POST(req: Request) {
     timestamp: new Date().toISOString(),
   };
 
-  // Bug B12 ainda não será corrigido neste commit.
-  // Ele será tratado separadamente para manter um bug por commit.
-  ACOES_MOCK.push(ordem as any);
+  // Bug B12: a ordem estava sendo adicionada ao array ACOES_MOCK,
+  // misturando ordens de compra com os dados das ações.
+  // CORREÇÃO: adicionar a ordem ao array correto, ORDENS_MOCK.
+  ORDENS_MOCK.push(ordem);
 
   return NextResponse.json(ordem, { status: 201 });
 }
