@@ -9,18 +9,24 @@ interface Props {
 }
 
 export default function BoletaForm({ acao }: Props) {
-  const [quantidade, setQuantidade] = useState(""); // Bug B14: string, não number
+  // CORREÇÃO B14 — SERVER VS CLIENT:
+  // A quantidade era armazenada como string e depois convertida
+  // implicitamente durante o cálculo.
+  // Agora o estado armazena um número, evitando operações com
+  // tipos diferentes e a necessidade de utilizar "as any".
+  const [quantidade, setQuantidade] = useState<number>(0);
+
   const [enviado, setEnviado] = useState(false);
 
-  // CORREÇÃO B13 — API / DADOS:
-  // O preço pode estar disponível como regularMarketPrice quando
-  // os dados vêm da BRAPI, ou como preco quando vêm do mock.
-  // Usamos regularMarketPrice como primeira opção e preco como fallback.
+  // B13 já corrigido:
+  // utiliza regularMarketPrice quando disponível e acao.preco como fallback.
   const precoAtual =
     (acao as any).regularMarketPrice ?? acao.preco;
 
-  // Bug B14: quantidade (string) * preco (number) = NaN → || 0 esconde o bug
-  const total = (quantidade as any) * precoAtual || 0;
+  // CORREÇÃO B14:
+  // O cálculo agora utiliza quantidade e precoAtual como números.
+  // Não é necessário utilizar "as any" nem esconder possíveis NaN com || 0.
+  const total = quantidade * precoAtual;
 
   async function handleCompra() {
     await fetch("/api/ordens", {
@@ -28,7 +34,7 @@ export default function BoletaForm({ acao }: Props) {
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
         ticker: acao.ticker,
-        quantidade: Number(quantidade),
+        quantidade: quantidade,
         preco: precoAtual,
         total,
         tipo: "compra",
@@ -100,9 +106,6 @@ export default function BoletaForm({ acao }: Props) {
             Preço atual
           </label>
 
-          {/* CORREÇÃO B13:
-              Utiliza o preço retornado pela BRAPI quando disponível
-              e acao.preco como fallback. */}
           <div
             style={{
               fontSize: "1.1rem"
@@ -129,7 +132,7 @@ export default function BoletaForm({ acao }: Props) {
           <input
             type="number"
             value={quantidade}
-            onChange={(e) => setQuantidade(e.target.value)} // Bug B14: e.target.value é string
+            onChange={(e) => setQuantidade(Number(e.target.value))}
             placeholder="Ex: 100"
             min="1"
             style={{
@@ -154,7 +157,8 @@ export default function BoletaForm({ acao }: Props) {
             Total estimado
           </label>
 
-          {/* Bug B14: ainda será corrigido no próximo commit */}
+          {/* CORREÇÃO B14:
+              O total agora é calculado diretamente com dois números. */}
           <div
             style={{
               fontSize: "1.25rem",
