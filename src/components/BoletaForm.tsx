@@ -12,14 +12,15 @@ export default function BoletaForm({ acao }: Props) {
   const [quantidade, setQuantidade] = useState(""); // Bug B14: string, não number
   const [enviado, setEnviado] = useState(false);
 
-  // CORREÇÃO B2 — SERVER VS CLIENT:
-  // Removido o useEffect e o fetch de /api/acoes/[ticker].
-  // O preço já está disponível em acao.preco através das props,
-  // portanto não é necessário realizar uma nova requisição no cliente.
+  // CORREÇÃO B13 — API / DADOS:
+  // O preço pode estar disponível como regularMarketPrice quando
+  // os dados vêm da BRAPI, ou como preco quando vêm do mock.
+  // Usamos regularMarketPrice como primeira opção e preco como fallback.
+  const precoAtual =
+    (acao as any).regularMarketPrice ?? acao.preco;
 
-  // Bug B13: acao.preco pode ser undefined quando a API retorna dados brapi raw
   // Bug B14: quantidade (string) * preco (number) = NaN → || 0 esconde o bug
-  const total = (quantidade as any) * acao.preco || 0;
+  const total = (quantidade as any) * precoAtual || 0;
 
   async function handleCompra() {
     await fetch("/api/ordens", {
@@ -28,7 +29,7 @@ export default function BoletaForm({ acao }: Props) {
       body: JSON.stringify({
         ticker: acao.ticker,
         quantidade: Number(quantidade),
-        preco: acao.preco,
+        preco: precoAtual,
         total,
         tipo: "compra",
       }),
@@ -99,15 +100,17 @@ export default function BoletaForm({ acao }: Props) {
             Preço atual
           </label>
 
-          {/* CORREÇÃO B2:
-              O preço é utilizado diretamente através de acao.preco.
-              Não há mais fetch nem estado precoAtual. */}
+          {/* CORREÇÃO B13:
+              Utiliza o preço retornado pela BRAPI quando disponível
+              e acao.preco como fallback. */}
           <div
             style={{
               fontSize: "1.1rem"
             }}
           >
-            {`R$ ${acao.preco}`}
+            {precoAtual === undefined
+              ? "Preço indisponível"
+              : `R$ ${precoAtual}`}
           </div>
         </div>
 
@@ -151,7 +154,7 @@ export default function BoletaForm({ acao }: Props) {
             Total estimado
           </label>
 
-          {/* Bug B14: sempre mostra R$ 0 por causa do || 0 */}
+          {/* Bug B14: ainda será corrigido no próximo commit */}
           <div
             style={{
               fontSize: "1.25rem",
