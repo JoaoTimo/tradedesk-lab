@@ -36,7 +36,7 @@ export default async function AcaoPage({ params }: Props) {
       </div>
 
       {/* Bug B3: onPrecoAtualizado é uma função — não pode ser passada de Server Component como prop para Client Component */}
-      <GraficoAcao acao={acao} onPrecoAtualizado={() => console.log("atualizado")} />
+      <GraficoAcao acao={acao} />
 
       <div style={{ marginTop: "2rem", textAlign: "right" }}>
         <Link
