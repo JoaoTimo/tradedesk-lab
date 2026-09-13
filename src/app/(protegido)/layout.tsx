@@ -1,10 +1,19 @@
-import Header from "@/components/Header"; // Bug B5: Header reimportado — aparece duplo em /carteira
-
-export default function ProtegidoLayout({ children }: { children: React.ReactNode }) {
+// Correção: o Header já é renderizado pelo layout raiz,
+// portanto não deve ser renderizado novamente neste layout.
+export default function ProtegidoLayout({
+  children
+}: {
+  children: React.ReactNode
+}) {
   return (
     <div>
-      <Header /> {/* Bug B5: causa Header duplo — o layout raiz já inclui */}
-      <div style={{ maxWidth: "1100px", margin: "0 auto", padding: "2rem" }}>
+      <div
+        style={{
+          maxWidth: "1100px",
+          margin: "0 auto",
+          padding: "2rem"
+        }}
+      >
         {children}
       </div>
     </div>
